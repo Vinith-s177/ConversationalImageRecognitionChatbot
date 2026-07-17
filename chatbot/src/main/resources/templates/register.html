@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create an Account - AuraBot</title>
+    <!-- Core Styling -->
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            
+            <h2 class="auth-title register-title">
+                Create an Account
+            </h2>
+
+            <!-- Validation Error display -->
+            <div th:if="${error}" class="error-message">
+                <strong>Error:</strong> <span th:text="${error}"></span>
+            </div>
+
+            <!-- Registration Form -->
+            <form th:action="@{/register}" method="post">
+                <div class="form-group">
+                    <label for="fullName" class="form-label">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" class="form-control" placeholder="Full Name" required autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Email Address" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="mobileNumber" class="form-label">Mobile Number</label>
+                    <input type="tel" id="mobileNumber" name="mobileNumber" class="form-control" placeholder="Mobile Number" required autocomplete="tel">
+                </div>
+
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••••••" required autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn-auth-register">Register</button>
+            </form>
+
+            <div class="auth-footer">
+                <a th:href="@{/login}" class="auth-link">Back to Login</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+name: aura_bot_flutter
+description: A Conversational Image Recognition Chatbot App with Anti-Gravity UI theme.
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Icons & Fonts
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+
+  # State Management & Service Location
+  provider: ^6.1.1
+  get_it: ^7.6.0
+
+  # Firebase Integration
+  firebase_core: ^4.11.0
+  firebase_auth: ^6.5.4
+  cloud_firestore: ^6.6.0
+  firebase_storage: ^13.4.3
+
+  # API Communications
+  http: ^1.2.0
+  flutter_dotenv: ^5.1.0
+  shared_preferences: ^2.2.3
+
+  # Camera & Gallery Uploads
+  camera: ^0.10.5+8
+  image_picker: ^1.0.7
+
+  # Formatting & Loaders
+  flutter_spinkit: ^5.2.0
+  uuid: ^4.3.3
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env

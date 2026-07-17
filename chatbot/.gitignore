@@ -1,0 +1,102 @@
+# ===============================
+# Spring Boot / Maven
+# ===============================
+HELP.md
+
+### Maven ###
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### Build Files ###
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+
+# ===============================
+# IDE Files
+# ===============================
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+
+### VS Code ###
+.vscode/
+
+
+# ===============================
+# Logs
+# ===============================
+*.log
+*.err.log
+
+
+# ===============================
+# Database
+# ===============================
+
+### H2 Database ###
+data/
+*.mv.db
+*.trace.db
+
+
+# ===============================
+# Uploaded Files
+# ===============================
+
+uploads/
+chatbot/uploads/
+
+
+# ===============================
+# Environment & Secrets
+# ===============================
+
+.env
+.env.*
+*.properties.local
+
+# API Keys / Tokens
+application-secret.properties
+secrets.properties
+
+
+# ===============================
+# Generated Files
+# ===============================
+
+*.class
+*.jar
+*.war
+
+
+# ===============================
+# OS Generated Files
+# ===============================
+
+.DS_Store
+Thumbs.db
+desktop.ini

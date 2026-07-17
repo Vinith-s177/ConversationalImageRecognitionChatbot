@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: chatbot-backend
+    env: docker
+    rootDir: chatbot
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8081"
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: N8N_WEBHOOK_URL
+        sync: false

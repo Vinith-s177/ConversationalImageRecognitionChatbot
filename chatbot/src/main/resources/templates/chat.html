@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analysis Workspace - Image Recognition Chatbot</title>
+    <!-- Core Styling -->
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+    <div class="app-container">
+        
+
+        <!-- Header -->
+        <div class="workspace-header">
+            <div class="header-title">
+                <h2>Analysis Workspace</h2>
+                <p>Analyzing: <strong th:text="${originalFilename}">image.png</strong></p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <a href="/" class="btn-back">← Upload New Image</a>
+                <div class="user-profile-header">
+                    <div class="user-profile-info">
+                        <div class="user-profile-name" th:text="${session.user.fullName}">User Name</div>
+                        <div class="user-profile-role" th:text="'@' + ${session.user.username}">@username</div>
+                    </div>
+                    <a th:href="@{/logout}" class="btn-logout">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Workspace Grid -->
+        <div class="workspace-grid">
+            
+            <!-- Left Panel: Vision & OCR Data -->
+            <div class="left-panel">
+                
+                <!-- Image Card -->
+                <div class="glass-card img-display-card">
+                    <img th:src="${imagePath}" alt="Uploaded Workspace Image" class="analyzed-img">
+                </div>
+
+                <!-- Image Recognition Results -->
+                <div class="glass-card">
+                    <h3 class="panel-section-title">🔍 Identified Objects</h3>
+                    <div class="object-list">
+                        <!-- Loop objects -->
+                        <div th:each="obj : ${detectedObjects}" class="object-item">
+                            <div class="object-meta">
+                                <div class="object-title-group">
+                                    <span class="object-name" th:text="${obj.name}">Object</span>
+                                    <div class="object-color-badge" th:if="${obj.color}">
+                                        <span class="color-dot-indicator" th:data-color="${obj.color}"></span>
+                                        <span class="color-text-label" th:text="${obj.color}">Red</span>
+                                    </div>
+                                </div>
+                                <span th:text="${#numbers.formatPercent(obj.confidence, 1, 0)}" 
+                                      th:classappend="${obj.confidence >= 0.85} ? 'confidence-high' : (${obj.confidence >= 0.65} ? 'confidence-med' : 'confidence-low')"
+                                      class="object-confidence">95%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" th:style="'width: ' + ${obj.confidence * 100} + '%'"></div>
+                            </div>
+                            <p class="object-desc" th:text="${obj.description}">Description text details...</p>
+                        </div>
+                        <div th:if="${#lists.isEmpty(detectedObjects)}" class="object-item">
+                            <p class="object-desc">No objects identified.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dominant Color Palette -->
+                <div class="glass-card color-palette-card">
+                    <h3 class="panel-section-title">🎨 Dominant Color Palette</h3>
+                    <div class="color-palette-grid">
+                        <div th:each="color : ${dominantColors}" class="color-palette-item">
+                            <div class="color-palette-preview" th:data-color="${color}"></div>
+                            <span class="color-palette-name" th:text="${color}">Red</span>
+                        </div>
+                        <div th:if="${#lists.isEmpty(dominantColors)}" class="color-palette-empty">
+                            <p class="color-palette-name">No colors detected.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OCR Extraction -->
+                <div class="glass-card ocr-card">
+                    <h3 class="panel-section-title">📝 Extracted Text (OCR)</h3>
+                    <button type="button" class="btn-copy" id="copyOcrBtn">Copy Text</button>
+                    <div class="ocr-content-wrapper">
+                        <pre id="ocrTextVal" th:text="${ocrText}">No text found.</pre>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Panel: Conversational Chatbot -->
+            <div class="right-panel">
+                <div class="glass-card chat-card">
+                    
+                    <div class="chat-card-header">
+                        <div class="chat-card-title">
+                            <span class="chat-pulse-dot"></span>
+                            <span>Visual AI Chatbot</span>
+                        </div>
+                        <form action="/chat/reset" method="post" style="margin: 0;">
+                            <button type="submit" class="btn-reset-chat">Clear History</button>
+                        </form>
+                    </div>
+
+                    <!-- Chat Messages Container -->
+                    <div class="chat-messages-container" id="chatMessages">
+                        
+                        <!-- Welcome message if history is empty -->
+                        <div th:if="${#lists.isEmpty(chatHistory)}" class="message bot">
+                            <div class="message-bubble">
+                                Hi there! I've analyzed your image. You can ask me questions about the objects I've identified, text I've extracted, or anything else visible in the picture. How can I help you?
+                            </div>
+                            <div class="message-meta">System</div>
+                        </div>
+
+                        <!-- Chat Messages History Loop -->
+                        <div th:each="msg : ${chatHistory}" th:class="'message ' + ${msg.sender}">
+                            <div class="message-bubble" th:utext="${msg.content}">
+                                Message body content...
+                            </div>
+                            <div class="message-meta" th:text="${msg.timestamp}">
+                                12:00
+                            </div>
+                        </div>
+
+                        <!-- Typing/Processing Indicator -->
+                        <div class="typing-indicator" id="typingIndicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- Input message box -->
+                    <form id="chatForm" class="chat-input-form">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Ask something about this image..." autocomplete="off" required>
+                        <button type="submit" class="btn-send-message" title="Send Message">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Client-side Chat logic -->
+    <script th:src="@{/js/chat.js}"></script>
+</body>
+</html>

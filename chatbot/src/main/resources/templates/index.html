@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversational Image Recognition Chatbot</title>
+    <!-- Core Styling -->
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- User Profile Bar -->
+        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 1rem; width: 100%;">
+            <div class="user-profile-header">
+                <div class="user-profile-info">
+                    <div class="user-profile-name" th:text="${fullName}">User Name</div>
+                    <div class="user-profile-role" th:text="'@' + ${username}">@username</div>
+                </div>
+                <a th:href="@{/logout}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+
+        <div class="landing-grid">
+            <!-- Header Section -->
+            <div class="logo-section">
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>Project Running Successfully</span>
+                </div>
+                <h1>Welcome to Conversational Image Recognition Chatbot 🚀</h1>
+                <p>Upload any image (JPG, JPEG, PNG) to extract text, recognize objects, and chat with AI about its details.</p>
+            </div>
+
+            <!-- Upload Card -->
+            <div class="glass-card upload-card">
+                <!-- Validation Error display -->
+                <div th:if="${error}" class="error-message">
+                    <strong>Error:</strong> <span th:text="${error}"></span>
+                </div>
+
+                <!-- Form Upload -->
+                <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <label for="imageInput" class="drag-area" id="dropZone">
+                        <div class="upload-icon">📤</div>
+                        <p class="upload-text"><span>Select image</span> or drag it here</p>
+                        <p class="upload-subtext">JPG, JPEG or PNG (Max 10MB)</p>
+                        <input type="file" name="image" id="imageInput" accept="image/png, image/jpeg, image/jpg" style="display: none;" required>
+                    </label>
+
+                    <!-- Preview Container (Requirement 1) -->
+                    <div class="preview-container" id="previewContainer">
+                        <img src="" alt="Selected Preview" class="preview-img" id="previewImg">
+                        <button type="button" class="btn-remove-preview" id="btnRemovePreview">Remove</button>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btnSubmit">Upload & Analyze</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client-side script for dropzone and instant local preview -->
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const dropZone = document.getElementById('dropZone');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImg = document.getElementById('previewImg');
+        const btnRemovePreview = document.getElementById('btnRemovePreview');
+        const btnSubmit = document.getElementById('btnSubmit');
+
+        // Trigger file select click
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('active');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            
+            if (e.dataTransfer.files.length) {
+                imageInput.files = e.dataTransfer.files;
+                handlePreview();
+            }
+        });
+
+        imageInput.addEventListener('change', handlePreview);
+
+        function handlePreview() {
+            const file = imageInput.files[0];
+            if (file) {
+                // Client-side extension validation
+                const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+                const validExtensions = ['.jpg', '.jpeg', '.png'];
+                
+                if (!validExtensions.includes(extension)) {
+                    alert('Unsupported file format. Please choose a JPG, JPEG, or PNG image.');
+                    clearInput();
+                    return;
+                }
+
+                // Client-side size validation (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size exceeds the 10MB limit.');
+                    clearInput();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    dropZone.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        btnRemovePreview.addEventListener('click', (e) => {
+            e.preventDefault();
+            clearInput();
+        });
+
+        function clearInput() {
+            imageInput.value = '';
+            previewImg.src = '';
+            previewContainer.style.display = 'none';
+            dropZone.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
