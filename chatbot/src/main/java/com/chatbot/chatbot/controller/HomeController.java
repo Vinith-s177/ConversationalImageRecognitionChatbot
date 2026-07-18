@@ -12,11 +12,20 @@ public class HomeController {
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-        if (user != null) {
+        if (user != null && user.getId() != null) {
+            return "redirect:/dashboard";
+        }
+        return "index";
+    }
+
+    @GetMapping("/dashboard")
+    public String dashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user != null && user.getId() != null) {
             model.addAttribute("username", user.getUsername());
             model.addAttribute("fullName", user.getFullName());
         }
-        return "index";
+        return "dashboard";
     }
 
 

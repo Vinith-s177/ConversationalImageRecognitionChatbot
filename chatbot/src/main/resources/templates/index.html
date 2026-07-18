@@ -3,134 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversational Image Recognition Chatbot</title>
+    <title>AI Chatbot - Conversational Image Recognition</title>
     <!-- Core Styling -->
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(to bottom, #090B13 0%, #131830 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: transparent;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        .navbar-brand span.icon {
+            color: #00e5ff;
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #d1d5db;
+        }
+
+        .nav-btn {
+            background-color: #8b5cf6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background-color: #7c3aed;
+        }
+
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 120px 20px 80px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .badge {
+            background-color: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            margin-bottom: 32px;
+            display: inline-block;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1.2;
+            margin: 0 0 24px 0;
+            color: white;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            margin: 0 0 48px 0;
+            max-width: 700px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 80px;
+        }
+
+        .btn-primary {
+            background-color: #8b5cf6;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background-color 0.2s;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .hero-mockup {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 100px 10px rgba(0, 229, 255, 0.1);
+        }
+
+        .hero-mockup .icon {
+            font-size: 100px;
+            color: #00e5ff;
+        }
+
+        .features-section {
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .features-title {
+            font-size: 2.25rem;
+            font-weight: bold;
+            margin-bottom: 48px;
+            color: white;
+        }
+
+        .features-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            width: 300px;
+            text-align: left;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .feature-icon-container {
+            background-color: rgba(0, 229, 255, 0.1);
+            display: inline-block;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .feature-icon {
+            color: #00e5ff;
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: white;
+        }
+
+        .feature-desc {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 32px 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.54);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.2rem; }
+            .hero-buttons { flex-direction: column; align-items: stretch; }
+            .btn-primary, .btn-outline { text-align: center; justify-content: center; }
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- User Profile Bar -->
-        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 1rem; width: 100%;">
-            <div class="user-profile-header">
-                <div class="user-profile-info">
-                    <div class="user-profile-name" th:text="${fullName}">User Name</div>
-                    <div class="user-profile-role" th:text="'@' + ${username}">@username</div>
-                </div>
-                <a th:href="@{/logout}" class="btn-logout">Logout</a>
-            </div>
+
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">
+            <span class="icon">🧠</span> AI Chatbot
+        </a>
+        <div class="navbar-links">
+            <a th:href="@{/login}" class="nav-link">Login</a>
+            <a th:href="@{/register}" class="nav-btn">Register</a>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="badge">FINAL YEAR MINI PROJECT</div>
+        <h1 class="hero-title">Conversational Image Recognition<br>Chatbot</h1>
+        <p class="hero-subtitle">
+            Upload any image and let our AI extract text, recognize objects, and engage in a natural conversation. A powerful, modern, and production-ready mini project.
+        </p>
+        
+        <div class="hero-buttons">
+            <a th:href="@{/dashboard}" class="btn-primary">
+                Get Started <span>→</span>
+            </a>
+            <a href="#features" class="btn-outline">
+                Explore Features
+            </a>
         </div>
 
-        <div class="landing-grid">
-            <!-- Header Section -->
-            <div class="logo-section">
-                <div class="status-badge">
-                    <span class="status-dot"></span>
-                    <span>Project Running Successfully</span>
+        <div class="hero-mockup">
+            <div class="icon">🖼️</div>
+        </div>
+    </div>
+
+    <div class="features-section" id="features">
+        <h2 class="features-title">Why Choose Our AI</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon-container">
+                    <div class="feature-icon">📄</div>
                 </div>
-                <h1>Welcome to Conversational Image Recognition Chatbot 🚀</h1>
-                <p>Upload any image (JPG, JPEG, PNG) to extract text, recognize objects, and chat with AI about its details.</p>
+                <h3 class="feature-title">Text Extraction</h3>
+                <p class="feature-desc">Extract text from images using advanced OCR technology.</p>
             </div>
-
-            <!-- Upload Card -->
-            <div class="glass-card upload-card">
-                <!-- Validation Error display -->
-                <div th:if="${error}" class="error-message">
-                    <strong>Error:</strong> <span th:text="${error}"></span>
+            
+            <div class="feature-card">
+                <div class="feature-icon-container">
+                    <div class="feature-icon">🔍</div>
                 </div>
-
-                <!-- Form Upload -->
-                <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
-                    <label for="imageInput" class="drag-area" id="dropZone">
-                        <div class="upload-icon">📤</div>
-                        <p class="upload-text"><span>Select image</span> or drag it here</p>
-                        <p class="upload-subtext">JPG, JPEG or PNG (Max 10MB)</p>
-                        <input type="file" name="image" id="imageInput" accept="image/png, image/jpeg, image/jpg" style="display: none;" required>
-                    </label>
-
-                    <!-- Preview Container (Requirement 1) -->
-                    <div class="preview-container" id="previewContainer">
-                        <img src="" alt="Selected Preview" class="preview-img" id="previewImg">
-                        <button type="button" class="btn-remove-preview" id="btnRemovePreview">Remove</button>
-                    </div>
-
-                    <button type="submit" class="btn-submit" id="btnSubmit">Upload & Analyze</button>
-                </form>
+                <h3 class="feature-title">Object Recognition</h3>
+                <p class="feature-desc">Identify objects, people, and scenery within any uploaded image.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon-container">
+                    <div class="feature-icon">💬</div>
+                </div>
+                <h3 class="feature-title">Conversational AI</h3>
+                <p class="feature-desc">Ask follow-up questions about the image and get natural responses.</p>
             </div>
         </div>
     </div>
 
-    <!-- Client-side script for dropzone and instant local preview -->
+    <div class="footer">
+        © 2026 Conversational Image Recognition Chatbot. Final Mini Project.
+    </div>
+
     <script>
-        const imageInput = document.getElementById('imageInput');
-        const dropZone = document.getElementById('dropZone');
-        const previewContainer = document.getElementById('previewContainer');
-        const previewImg = document.getElementById('previewImg');
-        const btnRemovePreview = document.getElementById('btnRemovePreview');
-        const btnSubmit = document.getElementById('btnSubmit');
-
-        // Trigger file select click
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('active');
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
         });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('active');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('active');
-            
-            if (e.dataTransfer.files.length) {
-                imageInput.files = e.dataTransfer.files;
-                handlePreview();
-            }
-        });
-
-        imageInput.addEventListener('change', handlePreview);
-
-        function handlePreview() {
-            const file = imageInput.files[0];
-            if (file) {
-                // Client-side extension validation
-                const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-                const validExtensions = ['.jpg', '.jpeg', '.png'];
-                
-                if (!validExtensions.includes(extension)) {
-                    alert('Unsupported file format. Please choose a JPG, JPEG, or PNG image.');
-                    clearInput();
-                    return;
-                }
-
-                // Client-side size validation (10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('File size exceeds the 10MB limit.');
-                    clearInput();
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewContainer.style.display = 'block';
-                    dropZone.style.display = 'none';
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        btnRemovePreview.addEventListener('click', (e) => {
-            e.preventDefault();
-            clearInput();
-        });
-
-        function clearInput() {
-            imageInput.value = '';
-            previewImg.src = '';
-            previewContainer.style.display = 'none';
-            dropZone.style.display = 'flex';
-        }
     </script>
 </body>
 </html>

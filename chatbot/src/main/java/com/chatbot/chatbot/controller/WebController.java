@@ -3,6 +3,7 @@ package com.chatbot.chatbot.controller;
 import com.chatbot.chatbot.model.ChatMessage;
 import com.chatbot.chatbot.model.User;
 import com.chatbot.chatbot.repository.ChatMessageRepository;
+import com.chatbot.chatbot.repository.UserRepository;
 import com.chatbot.chatbot.service.ImageRecognitionService;
 import com.chatbot.chatbot.service.OCRService;
 import jakarta.servlet.http.HttpSession;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Controller
 public class WebController {
@@ -34,12 +36,14 @@ public class WebController {
     private final OCRService ocrService;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatbotService chatbotService;
+    private final UserRepository userRepository;
 
-    public WebController(ImageRecognitionService imageRecognitionService, OCRService ocrService, ChatMessageRepository chatMessageRepository, ChatbotService chatbotService) {
+    public WebController(ImageRecognitionService imageRecognitionService, OCRService ocrService, ChatMessageRepository chatMessageRepository, ChatbotService chatbotService, UserRepository userRepository) {
         this.imageRecognitionService = imageRecognitionService;
         this.ocrService = ocrService;
         this.chatMessageRepository = chatMessageRepository;
         this.chatbotService = chatbotService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/upload")
@@ -47,13 +51,13 @@ public class WebController {
         try {
             if (imageFile.isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Please select an image to upload.");
-                return "redirect:/";
+                return "redirect:/dashboard";
             }
 
             // Validations
             if (imageFile.getSize() > 10 * 1024 * 1024) {
                 redirectAttributes.addFlashAttribute("error", "File size exceeds the 10MB limit.");
-                return "redirect:/";
+                return "redirect:/dashboard";
             }
 
             String contentType = imageFile.getContentType();
@@ -69,7 +73,7 @@ public class WebController {
 
             if (!isValidMime && !isValidExtension) {
                 redirectAttributes.addFlashAttribute("error", "Unsupported file format. Please upload JPG, JPEG, or PNG images.");
-                return "redirect:/";
+                return "redirect:/dashboard";
             }
 
             String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
@@ -105,7 +109,7 @@ public class WebController {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Failed to process image: " + e.getMessage());
-            return "redirect:/";
+            return "redirect:/dashboard";
         }
     }
 
@@ -113,7 +117,7 @@ public class WebController {
     public String showChatPage(HttpSession session, Model model) {
         String imagePath = (String) session.getAttribute("imagePath");
         if (imagePath == null) {
-            return "redirect:/"; // Redirect to home if no image uploaded
+            return "redirect:/dashboard"; // Redirect to dashboard if no image uploaded
         }
 
         model.addAttribute("originalFilename", session.getAttribute("originalFilename"));
@@ -235,5 +239,59 @@ public class WebController {
             session.removeAttribute("guestChatHistory");
         }
         return "redirect:/chat";
+    }
+
+    @GetMapping("/login")
+    public String showLoginPage() {
+        return "login";
+    }
+
+    @PostMapping("/login")
+    public String processLogin(@RequestParam("username") String username, @RequestParam("password") String password, HttpSession session, RedirectAttributes redirectAttributes) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
+            session.setAttribute("user", userOpt.get());
+            return "redirect:/dashboard";
+        }
+        redirectAttributes.addFlashAttribute("error", "Invalid username or password.");
+        return "redirect:/login";
+    }
+
+    @GetMapping("/register")
+    public String showRegisterPage() {
+        return "register";
+    }
+
+    @PostMapping("/register")
+    public String processRegister(@RequestParam("fullName") String fullName, 
+                                  @RequestParam("email") String email, 
+                                  @RequestParam("mobileNumber") String mobileNumber, 
+                                  @RequestParam("username") String username, 
+                                  @RequestParam("password") String password, 
+                                  RedirectAttributes redirectAttributes) {
+        if (userRepository.existsByUsername(username)) {
+            redirectAttributes.addFlashAttribute("error", "Username is already taken.");
+            return "redirect:/register";
+        }
+        if (userRepository.existsByEmail(email)) {
+            redirectAttributes.addFlashAttribute("error", "Email is already registered.");
+            return "redirect:/register";
+        }
+        User newUser = User.builder()
+                .fullName(fullName)
+                .email(email)
+                .mobileNumber(mobileNumber)
+                .username(username)
+                .password(password)
+                .build();
+        userRepository.save(newUser);
+        redirectAttributes.addFlashAttribute("successMessage", "Registration successful! Please login.");
+        return "redirect:/login";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
     }
 }
