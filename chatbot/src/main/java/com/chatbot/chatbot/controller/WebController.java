@@ -19,6 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.chatbot.chatbot.service.ChatbotService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class WebController {
@@ -26,11 +33,13 @@ public class WebController {
     private final ImageRecognitionService imageRecognitionService;
     private final OCRService ocrService;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatbotService chatbotService;
 
-    public WebController(ImageRecognitionService imageRecognitionService, OCRService ocrService, ChatMessageRepository chatMessageRepository) {
+    public WebController(ImageRecognitionService imageRecognitionService, OCRService ocrService, ChatMessageRepository chatMessageRepository, ChatbotService chatbotService) {
         this.imageRecognitionService = imageRecognitionService;
         this.ocrService = ocrService;
         this.chatMessageRepository = chatMessageRepository;
+        this.chatbotService = chatbotService;
     }
 
     @PostMapping("/upload")
@@ -126,5 +135,81 @@ public class WebController {
         model.addAttribute("chatHistory", chatHistory);
 
         return "chat";
+    }
+
+    @PostMapping("/chat/send")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendMessage(
+            @RequestParam("message") String userMessage,
+            HttpSession session) {
+        
+        Map<String, Object> response = new HashMap<>();
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            user = User.builder().username("guest").fullName("Guest User").build();
+            session.setAttribute("user", user);
+        }
+
+        String imagePath = (String) session.getAttribute("imagePath");
+        try {
+            List<ChatMessage> chatHistory = chatMessageRepository.findByUserOrderByIdAsc(user);
+
+            // 1. Save user message
+            ChatMessage userMsg = new ChatMessage("user", userMessage);
+            userMsg.setUser(user);
+            userMsg.setImageUrl(imagePath);
+            chatMessageRepository.save(userMsg);
+            chatHistory.add(userMsg);
+
+            // 2. Prepare visual context if image is provided
+            String visualContext = "";
+            String ocrText = "";
+            File imageFile = null;
+
+            if (imagePath != null && !imagePath.isEmpty()) {
+                String absolutePath = System.getProperty("user.dir") + imagePath;
+                imageFile = new File(absolutePath);
+                
+                if (imageFile.exists()) {
+                    visualContext = imageRecognitionService.analyzeImageDescription(imageFile);
+                    ocrText = ocrService.extractText(imageFile);
+                }
+            }
+
+            // 3. Invoke chatbot service
+            String botResponseText = chatbotService.getChatbotResponse(
+                    userMessage, 
+                    chatHistory, 
+                    visualContext, 
+                    ocrText, 
+                    imageFile
+            );
+
+            // 4. Save bot message
+            ChatMessage botMsg = new ChatMessage("bot", botResponseText);
+            botMsg.setUser(user);
+            chatMessageRepository.save(botMsg);
+
+            // 5. Return response
+            response.put("success", true);
+            response.put("reply", botResponseText); 
+            response.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("error", "An error occurred during message processing: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @PostMapping("/chat/reset")
+    public String clearHistory(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            List<ChatMessage> msgs = chatMessageRepository.findByUserOrderByIdAsc(user);
+            chatMessageRepository.deleteAll(msgs);
+        }
+        return "redirect:/chat";
     }
 }
