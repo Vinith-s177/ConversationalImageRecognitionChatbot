@@ -124,12 +124,16 @@ public class WebController {
 
         User user = (User) session.getAttribute("user");
         List<ChatMessage> chatHistory = new ArrayList<>();
-        if (user != null) {
+        if (user != null && user.getId() != null) {
             chatHistory = chatMessageRepository.findByUserOrderByIdAsc(user);
         } else {
             // Provide a dummy user for the session so chat.html doesn't crash on session.user.fullName
             User dummy = User.builder().username("guest").fullName("Guest User").build();
             session.setAttribute("user", dummy);
+            Object sessionHistory = session.getAttribute("guestChatHistory");
+            if (sessionHistory instanceof List) {
+                chatHistory = (List<ChatMessage>) sessionHistory;
+            }
         }
         
         model.addAttribute("chatHistory", chatHistory);
@@ -145,20 +149,31 @@ public class WebController {
         
         Map<String, Object> response = new HashMap<>();
         User user = (User) session.getAttribute("user");
-        if (user == null) {
+        boolean isGuest = user == null || user.getId() == null;
+        if (isGuest) {
             user = User.builder().username("guest").fullName("Guest User").build();
             session.setAttribute("user", user);
         }
 
         String imagePath = (String) session.getAttribute("imagePath");
         try {
-            List<ChatMessage> chatHistory = chatMessageRepository.findByUserOrderByIdAsc(user);
+            List<ChatMessage> chatHistory = new ArrayList<>();
+            if (!isGuest) {
+                chatHistory = chatMessageRepository.findByUserOrderByIdAsc(user);
+            } else {
+                Object sessionHistory = session.getAttribute("guestChatHistory");
+                if (sessionHistory instanceof List) {
+                    chatHistory = (List<ChatMessage>) sessionHistory;
+                }
+            }
 
             // 1. Save user message
             ChatMessage userMsg = new ChatMessage("user", userMessage);
-            userMsg.setUser(user);
-            userMsg.setImageUrl(imagePath);
-            chatMessageRepository.save(userMsg);
+            if (!isGuest) {
+                userMsg.setUser(user);
+                userMsg.setImageUrl(imagePath);
+                chatMessageRepository.save(userMsg);
+            }
             chatHistory.add(userMsg);
 
             // 2. Prepare visual context if image is provided
@@ -187,8 +202,15 @@ public class WebController {
 
             // 4. Save bot message
             ChatMessage botMsg = new ChatMessage("bot", botResponseText);
-            botMsg.setUser(user);
-            chatMessageRepository.save(botMsg);
+            if (!isGuest) {
+                botMsg.setUser(user);
+                chatMessageRepository.save(botMsg);
+            }
+            chatHistory.add(botMsg);
+            
+            if (isGuest) {
+                session.setAttribute("guestChatHistory", chatHistory);
+            }
 
             // 5. Return response
             response.put("success", true);
@@ -206,9 +228,11 @@ public class WebController {
     @PostMapping("/chat/reset")
     public String clearHistory(HttpSession session) {
         User user = (User) session.getAttribute("user");
-        if (user != null) {
+        if (user != null && user.getId() != null) {
             List<ChatMessage> msgs = chatMessageRepository.findByUserOrderByIdAsc(user);
             chatMessageRepository.deleteAll(msgs);
+        } else {
+            session.removeAttribute("guestChatHistory");
         }
         return "redirect:/chat";
     }
