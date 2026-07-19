@@ -114,19 +114,6 @@ class _LandingViewState extends State<LandingView> with SingleTickerProviderStat
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: AntiGravityTheme.neonPurple.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AntiGravityTheme.neonPurple.withOpacity(0.3)),
-            ),
-            child: Text(
-              "FINAL YEAR MINI PROJECT",
-              style: TextStyle(color: AntiGravityTheme.neonPurple, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.5),
-            ),
-          ),
-          const SizedBox(height: 32),
           const Text(
             "Conversational Image Recognition\nChatbot",
             textAlign: TextAlign.center,
@@ -140,8 +127,8 @@ class _LandingViewState extends State<LandingView> with SingleTickerProviderStat
           const SizedBox(height: 24),
           const SizedBox(
             width: 700,
-            child: const Text(
-              "Upload any image and let our AI extract text, recognize objects, and engage in a natural conversation. A powerful, modern, and production-ready mini project.",
+            child: Text(
+              "Upload any image and let our AI extract text, recognize objects, and engage in a natural conversation.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18, color: Colors.white70, height: 1.5),
             ),
@@ -270,7 +257,7 @@ class _LandingViewState extends State<LandingView> with SingleTickerProviderStat
       ),
       child: const Center(
         child: Text(
-          "© 2026 Conversational Image Recognition Chatbot. Final Mini Project.",
+          "© 2026 Conversational Image Recognition Chatbot.",
           style: TextStyle(color: Colors.white54),
         ),
       ),
